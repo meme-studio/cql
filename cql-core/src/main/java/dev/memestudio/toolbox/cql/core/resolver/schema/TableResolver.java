@@ -16,7 +16,7 @@ public class TableResolver implements Resolver<Table> {
     public UnaryOperator<ResolvingContext> parse(Table table) {
         return context -> {
             String certainName = Objects.nonNull(table.getAlias()) ? table.getAlias().getName() : table.getName();
-            Collection<Map<String, Object>> collectionTable = context.getSchemas().get(table.getName());
+            Collection<Map<String, Object>> collectionTable = context.getTables().get(table.getName());
             return context.withTableNames(Collections.singletonList(certainName))
                           .withResult(Stream.ofAll(Stream.ofAll(collectionTable)
                                                          .map(row -> row.entrySet()

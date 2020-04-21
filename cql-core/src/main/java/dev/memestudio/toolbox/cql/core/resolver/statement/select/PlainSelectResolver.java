@@ -46,16 +46,17 @@ public class PlainSelectResolver implements Resolver<PlainSelect> {
 
                 context = Option.of(select.getOffset())
                                 .map(Resolvers::resolve)
-                                .getOrElse(ctx -> ctx.withSkip(0))
+                                .getOrElse(ctx -> ctx.withSkip(() -> 0))
                                 .apply(context);
-                Integer skip = context.getSkip();
+                int skip = context.getSkip().getAsInt();
 
                 context = Option.of(select.getLimit())
                                 .map(Resolvers::resolve)
-                                .getOrElse(ctx -> ctx.withLimit(Integer.MAX_VALUE))
+                                .getOrElse(ctx -> ctx.withLimit(() -> Integer.MAX_VALUE))
                                 .apply(context);
-                Integer limit = context.getLimit();
+                int limit = context.getLimit().getAsInt();
 
+                //noinspection ComparatorMethodParameterNotUsed
                 result = result.filter(condition)
                                .map(mapper)
                                .distinctBy((__, ___) -> Objects.isNull(select.getDistinct()) ? 1 : 0)

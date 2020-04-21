@@ -8,16 +8,18 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
+import java.util.function.IntSupplier;
 import java.util.function.Predicate;
 import java.util.function.UnaryOperator;
 
 @With
-@Data
+@Getter
+@RequiredArgsConstructor(staticName = "tables")
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
-@NoArgsConstructor
 public class ResolvingContext {
 
-    private Map<String, Collection<Map<String, Object>>> schemas;
+    @NonNull
+    private final Map<String, Collection<Map<String, Object>>> tables;
 
     private List<String> tableNames;
 
@@ -31,8 +33,8 @@ public class ResolvingContext {
 
     private Comparator<Map<String, Object>> sort;
 
-    private Integer skip;
+    private IntSupplier skip;
 
-    private Integer limit;
+    private IntSupplier limit;
 
 }

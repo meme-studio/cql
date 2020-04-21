@@ -1,6 +1,6 @@
 package dev.memestudio.toolbox.cql.core;
 
-import dev.memestudio.toolbox.cql.core.util.ObjectConverter;
+import dev.memestudio.toolbox.cql.core.util.ObjectTransformer;
 import io.vavr.collection.Stream;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
@@ -28,7 +28,7 @@ public class ResultSet {
     }
 
     public <T> Stream<T> asStream(Class<T> type) {
-        return result.map(row -> ObjectConverter.convert(row, type));
+        return result.map(row -> ObjectTransformer.convert(row, type));
     }
 
     public void prettyPrint() {

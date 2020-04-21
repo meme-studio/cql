@@ -43,6 +43,7 @@ public class Resolvers {
         put(NotEqualsTo.class, new NotEqualsToResolver());
         put(SelectExpressionItem.class, new SelectExpressionItemResolver());
         put(AllColumns.class, new AllColumnsResolver());
+        put(Join.class, new JoinResolver());
     }};
 
     private final Map<Class<?>, Resolver<?>> COLLECTION_RESOLVERS = new HashMap<Class<?>, Resolver<?>>() {{

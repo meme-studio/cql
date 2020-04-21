@@ -8,6 +8,7 @@ import net.sf.jsqlparser.schema.Column;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.function.UnaryOperator;
 import java.util.stream.Collectors;
 
@@ -23,6 +24,7 @@ public class ColumnResolver implements Resolver<Column> {
         List<Object> val = context.getTableNames()
                                   .stream()
                                   .map(tableName -> row.get(tableName + "." + column.getColumnName()))
+                                  .filter(Objects::nonNull)
                                   .collect(Collectors.toList());
         Validates.isTrue(val.size() < 2, () -> new IllegalStateException(column.getColumnName()));
         return val.get(0);

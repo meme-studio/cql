@@ -7,6 +7,7 @@ import dev.memestudio.toolbox.cql.core.resolver.statement.select.*;
 import io.vavr.control.Option;
 import lombok.NonNull;
 import lombok.experimental.UtilityClass;
+import net.sf.jsqlparser.expression.Function;
 import net.sf.jsqlparser.expression.LongValue;
 import net.sf.jsqlparser.expression.NotExpression;
 import net.sf.jsqlparser.expression.Parenthesis;
@@ -44,6 +45,7 @@ public class Resolvers {
         put(SelectExpressionItem.class, new SelectExpressionItemResolver());
         put(AllColumns.class, new AllColumnsResolver());
         put(Join.class, new JoinResolver());
+        put(Function.class, new FunctionResolver());
     }};
 
     private final Map<Class<?>, Resolver<?>> COLLECTION_RESOLVERS = new HashMap<Class<?>, Resolver<?>>() {{
@@ -59,10 +61,10 @@ public class Resolvers {
                      .map(T::getClass)
                      .flatMap(typeClass -> Option.of(RESOLVERS.get(typeClass)))
                      .map(parser -> ((Resolver) parser))
-                     .map(parser -> parser.parse(type))
+                     .map(parser -> parser.resolve(type))
                      .orElse(() -> Option.of(COLLECTION_RESOLVERS.get(getRawType(type)))
                                          .map(parser -> ((Resolver) parser))
-                                         .map(parser -> parser.parse(type)))
+                                         .map(parser -> parser.resolve(type)))
                      .getOrElseThrow(() ->
                              new UnsupportedOperationException(String.join("", "Syntax '", type.toString(), "' not supported")));
     }

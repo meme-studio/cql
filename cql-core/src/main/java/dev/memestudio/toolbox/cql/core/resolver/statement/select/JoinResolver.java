@@ -42,20 +42,21 @@ public class JoinResolver implements Resolver<Join> {
             }};
 
     @Override
-    public UnaryOperator<ResolvingContext> parse(Join join) {
+    public UnaryOperator<ResolvingContext> resolve(Join join) {
+        UnaryOperator<ResolvingContext> rightItemResolving = Resolvers.resolve(join.getRightItem());
+        Option<UnaryOperator<ResolvingContext>> expressionResolving = Option.of(join.getOnExpression())
+                                                                            .map(Resolvers::resolve);
         return context -> {
             Stream<Map<String, Object>> left = context.getResult();
 
-            ResolvingContext ctx = Resolvers.resolve(join.getRightItem()).apply(context);
+            ResolvingContext ctx = rightItemResolving.apply(context);
             Stream<Map<String, Object>> right = ctx.getResult();
 
             List<String> tableNames = new ArrayList<>(context.getTableNames());
             tableNames.addAll(ctx.getTableNames());
-            Predicate<Map<String, Object>> condition = Option.of(join.getOnExpression())
-                                                             .map(Resolvers::resolve)
-                                                             .map(op -> op.apply(context))
-                                                             .map(ResolvingContext::getCondition)
-                                                             .getOrElse(() -> __ -> true);
+            Predicate<Map<String, Object>> condition = expressionResolving.map(op -> op.apply(context.withTableNames(tableNames)))
+                                                                          .map(ResolvingContext::getCondition)
+                                                                          .getOrElse(() -> __ -> true);
             return context.withTableNames(tableNames)
                           .withResult(getJoinTypeResolver(join).apply(left, right, condition));
         };

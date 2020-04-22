@@ -14,7 +14,7 @@ import java.util.stream.Collectors;
 
 public class ColumnResolver implements Resolver<Column> {
     @Override
-    public UnaryOperator<ResolvingContext> parse(Column column) {
+    public UnaryOperator<ResolvingContext> resolve(Column column) {
         return context -> context.withResolver(row ->
             Option.of(row.get(column.getFullyQualifiedName()))
                   .getOrElse(() -> resolveColumnVal(column, context, row)));
@@ -27,6 +27,6 @@ public class ColumnResolver implements Resolver<Column> {
                                   .filter(Objects::nonNull)
                                   .collect(Collectors.toList());
         Validates.isTrue(val.size() < 2, () -> new IllegalStateException(column.getColumnName()));
-        return val.get(0);
+        return val.isEmpty() ? null: val.get(0);
     }
 }

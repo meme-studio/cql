@@ -16,7 +16,7 @@ public class ChaosTests {
     @SneakyThrows
     @Test
     public void testCCJSqlParserUtil() {
-        Statement parsed = CCJSqlParserUtil.parse("SELECT * FROM a LEFT JOIN b ON ii = cc");
+        Statement parsed = CCJSqlParserUtil.parse("SELECT count(*), sum(DISTINCT b), ifnull(a, 11), * FROM a LEFT JOIN b ON ii = cc");
         System.out.println(parsed);
     }
 
@@ -49,6 +49,15 @@ public class ChaosTests {
                                                                         .orElse(Stream.of(leftRow)))
                                                .toJavaList();
         System.out.println(result);
+    }
+
+    @Test
+    public void testStreamCopy() {
+        Stream<Integer> stream1 = Stream.ofAll(1, 2, 3);
+        Stream<Integer> stream2 = Stream.ofAll(1, 2, 3).toStream();
+        System.out.println(stream2.toJavaList());
+        System.out.println(stream1.toJavaList());
+
     }
 
 

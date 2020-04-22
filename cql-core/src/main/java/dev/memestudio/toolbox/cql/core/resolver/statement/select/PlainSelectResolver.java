@@ -7,65 +7,115 @@ import io.vavr.collection.Stream;
 import io.vavr.control.Option;
 import net.sf.jsqlparser.statement.select.PlainSelect;
 
-import java.util.Comparator;
-import java.util.Map;
-import java.util.Objects;
-import java.util.function.Predicate;
 import java.util.function.UnaryOperator;
 
 public class PlainSelectResolver implements Resolver<PlainSelect> {
 
     @Override
-    public UnaryOperator<ResolvingContext> parse(PlainSelect select) {
-        return context -> {
-            //from where group-by avg,sum having select distinct order-by limit
-            context = Option.of(select.getJoins())
-                            .map(Resolvers::resolve)
-                            .getOrElse(UnaryOperator.identity())
-                            .apply(Option.of(select.getFromItem())
-                                         .map(Resolvers::resolve)
-                                         .getOrElse(ctx -> ctx.withResult(Stream.empty()))
-                                         .apply(context));
-            Stream<Map<String, Object>> result = context.getResult();
+    public UnaryOperator<ResolvingContext> resolve(PlainSelect select) {
+        //from where group-by avg,sum having select distinct order-by limit
+        UnaryOperator<ResolvingContext> formOp = formOp(select);
+        UnaryOperator<ResolvingContext> joinsOp = joinOp(select);
+        UnaryOperator<ResolvingContext> whereOp = whereOp(select);
+        UnaryOperator<ResolvingContext> groupByOp = groupByOp(select);
+        UnaryOperator<ResolvingContext> havingOp = havingOp(select);
+        UnaryOperator<ResolvingContext> distinctOp = distinctOp(select);
+        UnaryOperator<ResolvingContext> orderByOp = orderByOp(select);
+        UnaryOperator<ResolvingContext> selectOp = selectOp(select);
+        UnaryOperator<ResolvingContext> offsetOp = offsetOp(select);
+        UnaryOperator<ResolvingContext> limitOp = limitOp(select);
 
-            if (!result.isEmpty()) {
-                context = Option.of(select.getWhere())
-                                .map(Resolvers::resolve)
-                                .getOrElse(ctx -> ctx.withCondition(__ -> true))
-                                .apply(context);
-                Predicate<Map<String, Object>> condition = context.getCondition();
+        return context ->
+                limitOp.apply(
+                        offsetOp.apply(
+                                selectOp.apply(
+                                        orderByOp.apply(
+                                                distinctOp.apply(
+                                                        havingOp.apply(
+                                                                groupByOp.apply(
+                                                                        whereOp.apply(
+                                                                                joinsOp.apply(
+                                                                                        formOp.apply(context))))))))));
+    }
 
-                context = Resolvers.resolve(select.getSelectItems()).apply(context);
-                UnaryOperator<Map<String, Object>> mapper = context.getMapper();
+    private UnaryOperator<ResolvingContext> distinctOp(PlainSelect select) {
+        return Option.of(select.getDistinct())
+                     .map(Resolvers::resolve)
+                     .getOrElse(UnaryOperator::identity);
+    }
 
-                context = Option.of(select.getOrderByElements())
-                                .map(Resolvers::resolve)
-                                .getOrElse(ctx -> ctx.withSort((__, ___) -> 0))
-                                .apply(context);
-                Comparator<Map<String, Object>> sort = context.getSort();
+    private UnaryOperator<ResolvingContext> havingOp(PlainSelect select) {
+        return Option.of(select.getHaving())
+                     .map(Resolvers::resolve)
+                     .getOrElse(UnaryOperator::identity);
+    }
 
-                context = Option.of(select.getOffset())
-                                .map(Resolvers::resolve)
-                                .getOrElse(ctx -> ctx.withSkip(() -> 0))
-                                .apply(context);
-                int skip = context.getSkip().getAsInt();
+    private UnaryOperator<ResolvingContext> groupByOp(PlainSelect select) {
+        return Option.of(select.getGroupBy())
+                     .map(Resolvers::resolve)
+                     .getOrElse(UnaryOperator::identity);
+    }
 
-                context = Option.of(select.getLimit())
-                                .map(Resolvers::resolve)
-                                .getOrElse(ctx -> ctx.withLimit(() -> Integer.MAX_VALUE))
-                                .apply(context);
-                int limit = context.getLimit().getAsInt();
+    private UnaryOperator<ResolvingContext> selectOp(PlainSelect select) {
+        UnaryOperator<ResolvingContext> selectOp = Resolvers.resolve(select.getSelectItems());
+        return context -> context.withResult(context.getResult()
+                                                    .map(selectOp.apply(context)
+                                                                 .getMapper()));
+    }
 
-                //noinspection ComparatorMethodParameterNotUsed
-                result = result.filter(condition)
-                               .map(mapper)
-                               .distinctBy((__, ___) -> Objects.isNull(select.getDistinct()) ? 1 : 0)
-                               .sorted(sort)
-                               .drop(skip)
-                               .take(limit);
-            }
+    private UnaryOperator<ResolvingContext> limitOp(PlainSelect select) {
+        return Option.of(select.getLimit())
+                     .map(Resolvers::resolve)
+                .<UnaryOperator<ResolvingContext>>map(op ->
+                        ctx -> ctx.withResult(ctx.getResult()
+                                                 .take(op.apply(ctx)
+                                                         .getLimit()
+                                                         .getAsInt())))
+                .getOrElse(UnaryOperator::identity);
+    }
 
-            return context.withResult(result);
-        };
+    private UnaryOperator<ResolvingContext> offsetOp(PlainSelect select) {
+        return Option.of(select.getOffset())
+                     .map(Resolvers::resolve)
+                .<UnaryOperator<ResolvingContext>>map(op ->
+                        ctx -> ctx.withResult(ctx.getResult()
+                                                 .take(op.apply(ctx)
+                                                         .getOffset()
+                                                         .getAsInt())))
+                .getOrElse(UnaryOperator::identity);
+    }
+
+    private UnaryOperator<ResolvingContext> orderByOp(PlainSelect select) {
+        return Option.of(select.getOrderByElements())
+                     .map(Resolvers::resolve)
+                .<UnaryOperator<ResolvingContext>>map(op ->
+                        ctx -> ctx.withResult(ctx.getResult()
+                                                 .sorted(op.apply(ctx)
+                                                           .getSort())))
+                .getOrElse(UnaryOperator::identity);
+    }
+
+    private UnaryOperator<ResolvingContext> whereOp(PlainSelect select) {
+        return Option.of(select.getWhere())
+                     .map(Resolvers::resolve)
+                .<UnaryOperator<ResolvingContext>>map(op ->
+                        ctx -> ctx.withResult(ctx.getResult()
+                                                 .filter(op.apply(ctx)
+                                                           .getCondition())))
+                .getOrElse(UnaryOperator::identity);
+    }
+
+    private UnaryOperator<ResolvingContext> formOp(PlainSelect select) {
+        return Option.of(select.getFromItem())
+                     .map(Resolvers::resolve)
+                     .getOrElse(ctx -> ctx.withResult(Stream.empty()));
+    }
+
+    private UnaryOperator<ResolvingContext> joinOp(PlainSelect select) {
+        return Option.of(select.getJoins())
+                     .map(Resolvers::resolve)
+                .<UnaryOperator<ResolvingContext>>map(op ->
+                        ctx -> ctx.withResult(op.apply(ctx).getResult()))
+                .getOrElse(UnaryOperator::identity);
     }
 }

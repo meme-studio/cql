@@ -13,7 +13,7 @@ import java.util.stream.Collectors;
 public class TableResolver implements Resolver<Table> {
 
     @Override
-    public UnaryOperator<ResolvingContext> parse(Table table) {
+    public UnaryOperator<ResolvingContext> resolve(Table table) {
         return context -> {
             String certainName = Objects.nonNull(table.getAlias()) ? table.getAlias().getName() : table.getName();
             Collection<Map<String, Object>> collectionTable = context.getTables().get(table.getName());

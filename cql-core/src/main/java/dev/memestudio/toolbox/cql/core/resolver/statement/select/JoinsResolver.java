@@ -13,11 +13,13 @@ import java.util.function.UnaryOperator;
 public class JoinsResolver implements Resolver<List<Join>> {
 
     @Override
-    public UnaryOperator<ResolvingContext> parse(List<Join> joins) {
+    public UnaryOperator<ResolvingContext> resolve(List<Join> joins) {
+        List<UnaryOperator<ResolvingContext>> joinOps = Stream.ofAll(joins)
+                                                              .map(Resolvers::resolve)
+                                                              .toJavaList();
         return context -> {
             AtomicReference<ResolvingContext> ref = new AtomicReference<>(context);
-            return context.withResult(Stream.ofAll(joins)
-                                            .map(Resolvers::resolve)
+            return context.withResult(Stream.ofAll(joinOps)
                                             .map(op -> op.apply(ref.get()))
                                             .peek(ref::set)
                                             .last()

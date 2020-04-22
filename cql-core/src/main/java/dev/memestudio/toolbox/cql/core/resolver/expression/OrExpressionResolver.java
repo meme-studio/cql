@@ -14,14 +14,14 @@ import java.util.function.UnaryOperator;
 public class OrExpressionResolver implements Resolver<OrExpression> {
 
     @Override
-    public UnaryOperator<ResolvingContext> parse(OrExpression orExpression) {
+    public UnaryOperator<ResolvingContext> resolve(OrExpression orExpression) {
+        UnaryOperator<ResolvingContext> leftOp = Resolvers.resolve(orExpression.getLeftExpression());
+        UnaryOperator<ResolvingContext> rightOp = Resolvers.resolve(orExpression.getRightExpression());
         return context -> context.withCondition(Option.of(context.getCondition())
                                                       .getOrElse(() -> __ -> true)
-                                                      .and(Resolvers.resolve(orExpression.getLeftExpression())
-                                                                     .apply(context)
-                                                                     .getCondition()
-                                                                     .or(Resolvers.resolve(orExpression.getRightExpression())
-                                                                                  .apply(context)
-                                                                                  .getCondition())));
+                                                      .and(leftOp.apply(context)
+                                                                 .getCondition()
+                                                                 .or(rightOp.apply(context)
+                                                                            .getCondition())));
     }
 }

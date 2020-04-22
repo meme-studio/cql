@@ -15,20 +15,18 @@ import java.util.function.UnaryOperator;
 public class NotEqualsToResolver implements Resolver<NotEqualsTo> {
 
     @Override
-    public UnaryOperator<ResolvingContext> parse(NotEqualsTo notEqualsTo) {
+    public UnaryOperator<ResolvingContext> resolve(NotEqualsTo notEqualsTo) {
+        UnaryOperator<ResolvingContext> leftOp = Resolvers.resolve(notEqualsTo.getLeftExpression());
+        UnaryOperator<ResolvingContext> rightOp = Resolvers.resolve(notEqualsTo.getRightExpression());
         return context -> context.withCondition(Option.of(context.getCondition())
                                                       .getOrElse(() -> __ -> true)
-                                                      .and(colObj ->
-                                                            !Objects.equals(
-                                                                    Resolvers.resolve(notEqualsTo.getLeftExpression())
-                                                                             .apply(context)
-                                                                             .getResolver()
-                                                                             .apply(colObj),
-                                                                    Resolvers.resolve(notEqualsTo.getRightExpression())
-                                                                             .apply(context)
-                                                                             .getResolver()
-                                                                             .apply(colObj))
-                                                    ));
+                                                      .and(colObj -> !Objects.equals(
+                                                              leftOp.apply(context)
+                                                                    .getResolver()
+                                                                    .apply(colObj),
+                                                              rightOp.apply(context)
+                                                                     .getResolver()
+                                                                     .apply(colObj))));
 
     }
 }

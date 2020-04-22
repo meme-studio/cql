@@ -8,6 +8,6 @@ import java.util.function.UnaryOperator;
  */
 public interface Resolver<T> {
 
-    UnaryOperator<ResolvingContext> parse(T type);
+    UnaryOperator<ResolvingContext> resolve(T type);
 
 }

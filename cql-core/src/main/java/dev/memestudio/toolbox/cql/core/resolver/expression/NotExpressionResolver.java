@@ -14,13 +14,13 @@ import java.util.function.UnaryOperator;
 public class NotExpressionResolver implements Resolver<NotExpression> {
 
     @Override
-    public UnaryOperator<ResolvingContext> parse(NotExpression notExpression) {
+    public UnaryOperator<ResolvingContext> resolve(NotExpression notExpression) {
+        UnaryOperator<ResolvingContext> notOp = Resolvers.resolve(notExpression.getExpression());
         return context -> context.withCondition(Option.of(context.getCondition())
                                                       .getOrElse(() -> __ -> true)
-                                                      .and(Resolvers.resolve(notExpression.getExpression())
-                                                                     .apply(context)
-                                                                     .getCondition()
-                                                                     .negate()));
+                                                      .and(notOp.apply(context)
+                                                                .getCondition()
+                                                                .negate()));
 
     }
 }

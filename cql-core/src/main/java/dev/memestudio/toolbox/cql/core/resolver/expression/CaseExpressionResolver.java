@@ -14,7 +14,7 @@ import java.util.function.UnaryOperator;
  */
 public class CaseExpressionResolver implements Resolver<CaseExpression> {
     @Override
-    public UnaryOperator<ResolvingContext> parse(CaseExpression caseExpression) {
+    public UnaryOperator<ResolvingContext> resolve(CaseExpression caseExpression) {
         Expression switchExpression = caseExpression.getSwitchExpression();
         List<WhenClause> whenClauses = caseExpression.getWhenClauses();
         return null;

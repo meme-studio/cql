@@ -11,7 +11,7 @@ import java.util.function.UnaryOperator;
  */
 public class AllColumnsResolver implements Resolver<AllColumns> {
     @Override
-    public UnaryOperator<ResolvingContext> parse(AllColumns allColumns) {
+    public UnaryOperator<ResolvingContext> resolve(AllColumns allColumns) {
         return context -> context.withMapper(UnaryOperator.identity());
     }
 }

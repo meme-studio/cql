@@ -33,7 +33,7 @@ public class ResolvingContext {
 
     private Comparator<Map<String, Object>> sort;
 
-    private IntSupplier skip;
+    private IntSupplier offset;
 
     private IntSupplier limit;
 

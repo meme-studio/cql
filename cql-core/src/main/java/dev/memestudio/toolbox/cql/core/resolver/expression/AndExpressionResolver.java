@@ -14,15 +14,15 @@ import java.util.function.UnaryOperator;
 public class AndExpressionResolver implements Resolver<AndExpression> {
 
     @Override
-    public UnaryOperator<ResolvingContext> parse(AndExpression andExpression) {
+    public UnaryOperator<ResolvingContext> resolve(AndExpression andExpression) {
+        UnaryOperator<ResolvingContext> leftOp = Resolvers.resolve(andExpression.getLeftExpression());
+        UnaryOperator<ResolvingContext> rightOp = Resolvers.resolve(andExpression.getRightExpression());
         return context -> context.withCondition(Option.of(context.getCondition())
                                                       .getOrElse(() -> __ -> true)
-                                                      .and(Resolvers.resolve(andExpression.getLeftExpression())
-                                                                     .apply(context)
-                                                                     .getCondition()
-                                                                     .and(Resolvers.resolve(andExpression.getRightExpression())
-                                                                                   .apply(context)
-                                                                                   .getCondition())));
+                                                      .and(leftOp.apply(context)
+                                                                 .getCondition()
+                                                                 .and(rightOp.apply(context)
+                                                                             .getCondition())));
 
     }
 }

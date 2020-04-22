@@ -10,7 +10,7 @@ import java.util.function.UnaryOperator;
 public class SelectResolver implements Resolver<Select> {
 
     @Override
-    public UnaryOperator<ResolvingContext> parse(Select select) {
+    public UnaryOperator<ResolvingContext> resolve(Select select) {
         return Resolvers.resolve(select.getSelectBody());
     }
 }

@@ -11,7 +11,7 @@ import java.util.function.UnaryOperator;
  */
 public class LongValueResolver implements Resolver<LongValue> {
     @Override
-    public UnaryOperator<ResolvingContext> parse(LongValue type) {
-        return context -> context.withResolver(__ -> type.getValue());
+    public UnaryOperator<ResolvingContext> resolve(LongValue longValue) {
+        return context -> context.withResolver(__ -> longValue.getValue());
     }
 }

@@ -15,19 +15,18 @@ import java.util.function.UnaryOperator;
 public class EqualsToResolver implements Resolver<EqualsTo> {
 
     @Override
-    public UnaryOperator<ResolvingContext> parse(EqualsTo equalsTo) {
+    public UnaryOperator<ResolvingContext> resolve(EqualsTo equalsTo) {
+        UnaryOperator<ResolvingContext> leftOp = Resolvers.resolve(equalsTo.getLeftExpression());
+        UnaryOperator<ResolvingContext> rightOp = Resolvers.resolve(equalsTo.getRightExpression());
         return context -> context.withCondition(Option.of(context.getCondition())
                                                       .getOrElse(() -> __ -> true)
                                                       .and(colObj -> Objects.equals(
-                                                              Resolvers.resolve(equalsTo.getLeftExpression())
-                                                                       .apply(context)
-                                                                       .getResolver()
-                                                                       .apply(colObj),
-                                                              Resolvers.resolve(equalsTo.getRightExpression())
-                                                                       .apply(context)
-                                                                       .getResolver()
-                                                                       .apply(colObj))
-                                                      ));
+                                                              leftOp.apply(context)
+                                                                    .getResolver()
+                                                                    .apply(colObj),
+                                                              rightOp.apply(context)
+                                                                     .getResolver()
+                                                                     .apply(colObj))));
 
     }
 }

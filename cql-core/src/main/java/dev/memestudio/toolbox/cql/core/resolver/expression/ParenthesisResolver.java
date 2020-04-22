@@ -13,7 +13,7 @@ import java.util.function.UnaryOperator;
 public class ParenthesisResolver implements Resolver<Parenthesis> {
 
     @Override
-    public UnaryOperator<ResolvingContext> parse(Parenthesis parenthesis) {
+    public UnaryOperator<ResolvingContext> resolve(Parenthesis parenthesis) {
         return Resolvers.resolve(parenthesis.getExpression());
     }
 }

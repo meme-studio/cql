@@ -15,16 +15,19 @@ import java.util.stream.Collectors;
 public class SelectItemsResolver implements Resolver<List<SelectItem>> {
 
     @Override
-    public UnaryOperator<ResolvingContext> parse(List<SelectItem> selectItems) {
+    public UnaryOperator<ResolvingContext> resolve(List<SelectItem> selectItems) {
+        List<UnaryOperator<ResolvingContext>> selectItemOps = Stream.ofAll(selectItems)
+                                                                    .map(Resolvers::resolve)
+                                                                    .toJavaList();
         return context -> context.withMapper(
-                row -> Stream.ofAll(selectItems)
-                             .map(Resolvers::resolve)
+                row -> Stream.ofAll(selectItemOps)
                              .map(op -> op.apply(context))
                              .map(ResolvingContext::getMapper)
                              .map(mapper -> mapper.apply(row))
                              .flatMap(Map::entrySet)
                              .filter(entry -> Objects.nonNull(entry.getValue()))
-                             .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue)));
+                             .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue))
+        );
     }
 
 }

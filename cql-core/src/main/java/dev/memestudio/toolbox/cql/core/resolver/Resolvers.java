@@ -8,10 +8,7 @@ import io.vavr.collection.HashMap;
 import io.vavr.collection.Map;
 import lombok.NonNull;
 import lombok.experimental.UtilityClass;
-import net.sf.jsqlparser.expression.Function;
-import net.sf.jsqlparser.expression.LongValue;
-import net.sf.jsqlparser.expression.NotExpression;
-import net.sf.jsqlparser.expression.Parenthesis;
+import net.sf.jsqlparser.expression.*;
 import net.sf.jsqlparser.expression.operators.conditional.AndExpression;
 import net.sf.jsqlparser.expression.operators.conditional.OrExpression;
 import net.sf.jsqlparser.expression.operators.relational.EqualsTo;
@@ -44,6 +41,9 @@ public class Resolvers {
                     .put(SelectExpressionItem.class, new SelectExpressionItemResolver())
                     .put(AllColumns.class, new AllColumnsResolver())
                     .put(Join.class, new JoinResolver())
+                    .put(CaseExpression.class, new CaseExpressionResolver())
+                    .put(WhenClause.class, new WhenClauseResolver())
+                    .put(StringValue.class, new StringValueResolver())
                     .put(Function.class, new FunctionResolver());
 
     @SuppressWarnings({"unchecked", "rawtypes"})

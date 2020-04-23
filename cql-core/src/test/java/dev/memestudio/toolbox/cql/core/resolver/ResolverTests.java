@@ -35,7 +35,7 @@ public class ResolverTests {
     public void testJoinSelect() {
         //"SELECT count(aa), aa.heihei, aa.heihei, CASE WHEN a=1 THEN 9 ELSE 1 END FROM a1 aa JOIN bb ON a1.aa = bb.df JOIN (SELECT * FROM dd) cc ON bb.s = cc.fda WHERE a1.bb = 9 AND (a1.cc = 10 AND a1.cc <> 1)"
         List<Map<String, Object>> result =
-                CollectionQL.statement("SELECT ifnull(a1.bb, 99999) AS hahah , count(*) FROM a1 LEFT JOIN b1 ON a1.bb = b1.bb RIGHT JOIN c1 ON b1.bb = c1.bbb")
+                CollectionQL.statement("SELECT CASE a1.bb WHEN 2 THEN 'heihei' WHEN 1 THEN 'hahah' ELSE 'uhuhuhu' END FROM a1 LEFT JOIN b1 ON a1.bb = b1.bb RIGHT JOIN c1 ON b1.bb = c1.bbb")
                             .tables(
                                     new HashMap<String, Collection<Map<String, Object>>>() {{
                                         put("a1", new ArrayList<Map<String, Object>>() {{

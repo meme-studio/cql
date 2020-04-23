@@ -7,7 +7,13 @@ import io.vavr.collection.Stream;
 import io.vavr.control.Option;
 import net.sf.jsqlparser.statement.select.PlainSelect;
 
+import java.util.Map;
+import java.util.Objects;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.UnaryOperator;
+import java.util.stream.Collectors;
+
+import static io.vavr.API.Option;
 
 public class PlainSelectResolver implements Resolver<PlainSelect> {
 
@@ -57,10 +63,22 @@ public class PlainSelectResolver implements Resolver<PlainSelect> {
     }
 
     private UnaryOperator<ResolvingContext> selectOp(PlainSelect select) {
-        UnaryOperator<ResolvingContext> selectOp = Resolvers.resolve(select.getSelectItems());
-        return context -> context.withResult(context.getResult()
-                                                    .map(selectOp.apply(context)
-                                                                 .getMapper()));
+        return Option(select.getSelectItems())
+                .map(Stream::ofAll)
+                .map(joins -> joins.map(Resolvers::resolve)
+                                   .toList())
+                .<UnaryOperator<ResolvingContext>>map(
+                        ops ->
+                                context ->
+                                        context.withResult(context.getResult()
+                                                                  .map(row -> Stream.ofAll(ops)
+                                                                                    .map(op -> op.apply(context))
+                                                                                    .map(ResolvingContext::getMapper)
+                                                                                    .map(mapper -> mapper.apply(row))
+                                                                                    .flatMap(Map::entrySet)
+                                                                                    .filter(entry -> Objects.nonNull(entry.getValue()))
+                                                                                    .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue)))))
+                .getOrElse(UnaryOperator::identity);
     }
 
     private UnaryOperator<ResolvingContext> limitOp(PlainSelect select) {
@@ -112,10 +130,18 @@ public class PlainSelectResolver implements Resolver<PlainSelect> {
     }
 
     private UnaryOperator<ResolvingContext> joinOp(PlainSelect select) {
-        return Option.of(select.getJoins())
-                     .map(Resolvers::resolve)
-                .<UnaryOperator<ResolvingContext>>map(op ->
-                        ctx -> ctx.withResult(op.apply(ctx).getResult()))
+        return Option(select.getJoins())
+                .map(Stream::ofAll)
+                .map(joins -> joins.map(Resolvers::resolve)
+                                   .toList())
+                .<UnaryOperator<ResolvingContext>>map(ops -> context -> {
+                    AtomicReference<ResolvingContext> ref = new AtomicReference<>(context);
+                    return context.withResult(Stream.ofAll(ops)
+                                                    .map(op -> op.apply(ref.get()))
+                                                    .peek(ref::set)
+                                                    .last()
+                                                    .getResult());
+                })
                 .getOrElse(UnaryOperator::identity);
     }
 }

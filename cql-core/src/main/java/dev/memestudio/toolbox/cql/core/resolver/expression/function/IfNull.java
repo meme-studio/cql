@@ -1,21 +1,22 @@
 package dev.memestudio.toolbox.cql.core.resolver.expression.function;
 
 import io.vavr.collection.Stream;
+import io.vavr.control.Option;
 import lombok.Getter;
 
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 
-
-public class Count implements Fn {
+public class IfNull implements Fn {
 
     @Getter
-    private final String name = "count";
+    private final String name = "ifnull";
 
     @Override
     public Function<Map<String, Object>, Object> apply(Stream<Map<String, Object>> resultSet,
                                                        List<Function<Map<String, Object>, Object>> parameters) {
-        return row -> resultSet.size();
+        return row -> Option.of(parameters.get(0).apply(row))
+                            .getOrElse(() -> parameters.get(1).apply(row));
     }
 }

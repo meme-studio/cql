@@ -12,6 +12,7 @@ import java.util.function.UnaryOperator;
 public class AllColumnsResolver implements Resolver<AllColumns> {
     @Override
     public UnaryOperator<ResolvingContext> resolve(AllColumns allColumns) {
-        return context -> context.withMapper(UnaryOperator.identity());
+        return context -> context.withSingleResultSet(false)
+                                 .withMapper(UnaryOperator.identity());
     }
 }

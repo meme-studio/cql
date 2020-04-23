@@ -1,6 +1,7 @@
 package dev.memestudio.toolbox.cql.core.resolver;
 
 import dev.memestudio.toolbox.cql.core.util.ObjectTransformer;
+import io.vavr.API;
 import io.vavr.collection.Stream;
 import lombok.SneakyThrows;
 import net.sf.jsqlparser.parser.CCJSqlParserUtil;
@@ -57,6 +58,13 @@ public class ChaosTests {
         Stream<Integer> stream2 = Stream.ofAll(1, 2, 3).toStream();
         System.out.println(stream2.toJavaList());
         System.out.println(stream1.toJavaList());
+
+    }
+
+    @Test
+    public void testVavrMap() {
+        io.vavr.collection.Map<Object, Object> put = API.Map().put(1, 1);
+        System.out.println(put);
 
     }
 

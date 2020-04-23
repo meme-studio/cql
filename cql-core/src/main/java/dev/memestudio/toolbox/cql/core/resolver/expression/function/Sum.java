@@ -1,29 +1,21 @@
 package dev.memestudio.toolbox.cql.core.resolver.expression.function;
 
-import dev.memestudio.toolbox.cql.core.resolver.ResolvingContext;
 import io.vavr.collection.Stream;
 import lombok.Getter;
 
 import java.util.List;
 import java.util.Map;
-import java.util.function.UnaryOperator;
+import java.util.function.Function;
 
 
-public class Sum implements Function {
+public class Sum implements Fn {
 
     @Getter
     private final String name = "sum";
 
     @Override
-    public UnaryOperator<ResolvingContext> apply(List<UnaryOperator<ResolvingContext>> parameterOps) {
-        return context -> {
-            Stream<Map<String, Object>> result = context.getResult();
-            Stream<Map<String, Object>> resultCopy = result.toStream();
-            return context.withResolver(__ -> result.map(parameterOps.get(0)
-                                                                     .apply(context)
-                                                                     .getResolver())
-                                                    .sum())
-                          .withResult(resultCopy);
-        };
+    public Function<Map<String, Object>, Object> apply(Stream<Map<String, Object>> resultSet,
+                                                       List<Function<Map<String, Object>, Object>> parameters) {
+        return row -> resultSet.map(parameters.get(0)).sum();
     }
 }

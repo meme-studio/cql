@@ -1,14 +1,11 @@
 package dev.memestudio.toolbox.cql.core.resolver;
 
-import dev.memestudio.toolbox.cql.core.util.ObjectTransformer;
 import io.vavr.API;
 import io.vavr.collection.Stream;
 import lombok.SneakyThrows;
 import net.sf.jsqlparser.parser.CCJSqlParserUtil;
 import net.sf.jsqlparser.statement.Statement;
 import org.junit.Test;
-
-import java.util.*;
 
 @SuppressWarnings("SqlResolve")
 public class ChaosTests {
@@ -17,7 +14,8 @@ public class ChaosTests {
     @SneakyThrows
     @Test
     public void testCCJSqlParserUtil() {
-        Statement parsed = CCJSqlParserUtil.parse("SELECT count(*), sum(DISTINCT b), ifnull(a, 11), * FROM a LEFT JOIN b ON ii = cc GROUP BY abs(a % 10) HAVING sum(b)");
+        //Statement parsed = CCJSqlParserUtil.parse("SELECT count(*), sum(DISTINCT b), ifnull(a, 11), * FROM a LEFT JOIN b ON ii = cc GROUP BY abs(a % 10) HAVING sum(b)");
+        Statement parsed = CCJSqlParserUtil.parse("SELECT * FROM (SELECT aa FROM a UNION ALL SELECT aa FROM b) JOIN c WHERE id = 1 INTERSECT SELECT cc FROM c");
         System.out.println(parsed);
     }
 

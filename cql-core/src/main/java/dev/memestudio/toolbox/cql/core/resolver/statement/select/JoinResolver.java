@@ -20,21 +20,20 @@ public class JoinResolver implements Resolver<Join> {
 
     @Override
     public UnaryOperator<ResolvingContext> resolve(Join join) {
-        UnaryOperator<ResolvingContext> rightItemResolving = Resolvers.resolve(join.getRightItem());
-        Option<UnaryOperator<ResolvingContext>> expressionResolving = Option.of(join.getOnExpression())
-                                                                            .map(Resolvers::resolve);
+        UnaryOperator<ResolvingContext> rightItemOp = Resolvers.resolve(join.getRightItem());
+        UnaryOperator<ResolvingContext> expressionOp = Option.of(join.getOnExpression())
+                                                             .map(Resolvers::resolve)
+                                                             .getOrElse(context -> context.withCondition(__ -> true));
         Function3<Stream<Map<String, Object>>, Stream<Map<String, Object>>, Predicate<Map<String, Object>>, Stream<Map<String, Object>>> resolver =
                 JoinType.getResolver(join);
         return context -> {
             Stream<Map<String, Object>> left = context.getResult();
-            ResolvingContext ctx = rightItemResolving.apply(context);
+            ResolvingContext ctx = rightItemOp.apply(context);
             Stream<Map<String, Object>> right = ctx.getResult();
             List<String> tableNames = context.getTableNames()
                                              .appendAll(ctx.getTableNames());
-
-            Predicate<Map<String, Object>> condition = expressionResolving.map(op -> op.apply(context.withTableNames(tableNames)))
-                                                                          .map(ResolvingContext::getCondition)
-                                                                          .getOrElse(() -> __ -> true);
+            Predicate<Map<String, Object>> condition = expressionOp.apply(context.withTableNames(tableNames))
+                                                                   .getCondition();
             return context.withTableNames(tableNames)
                           .withResult(resolver.apply(left, right, condition));
         };

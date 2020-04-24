@@ -8,7 +8,6 @@ import io.vavr.collection.List;
 import io.vavr.collection.Map;
 import net.sf.jsqlparser.schema.Column;
 
-import java.util.Objects;
 import java.util.function.UnaryOperator;
 
 public class ColumnResolver implements Resolver<Column> {
@@ -20,13 +19,10 @@ public class ColumnResolver implements Resolver<Column> {
     }
 
     private Object resolveColumnValue(Column column, ResolvingContext context, Map<String, Object> row) {
-        List<Object> value = context.getTableNames()
-                                    .map(tableName -> row.get(tableName + "." + column.getColumnName())
-                                                         .getOrNull())
-                                    .filter(Objects::nonNull)
-                                    .toList();
-        Validates.isTrue(value.size() < 2,
+        List<Object> columnValue = context.getTableNames()
+                                          .flatMap(tableName -> row.get(tableName + "." + column.getColumnName()));
+        Validates.isTrue(columnValue.size() < 2,
                 () -> new ResolvingException("Ambiguous column name '", column.getColumnName(), "'"));
-        return value.getOrNull();
+        return columnValue.getOrNull();
     }
 }

@@ -4,11 +4,11 @@ import dev.memestudio.toolbox.cql.core.resolver.Resolver;
 import dev.memestudio.toolbox.cql.core.resolver.Resolvers;
 import dev.memestudio.toolbox.cql.core.resolver.ResolvingContext;
 import io.vavr.Tuple2;
+import io.vavr.collection.List;
 import io.vavr.collection.Stream;
 import io.vavr.control.Option;
 import net.sf.jsqlparser.statement.select.PlainSelect;
 
-import java.util.Objects;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.UnaryOperator;
 
@@ -74,7 +74,6 @@ public class PlainSelectResolver implements Resolver<PlainSelect> {
                                                                                     .map(op -> op.apply(context))
                                                                                     .map(ResolvingContext::getMapper)
                                                                                     .flatMap(mapper -> mapper.apply(row))
-                                                                                    .filter(tuple2 -> Objects.nonNull(tuple2._2()))
                                                                                     .toMap(Tuple2::_1, Tuple2::_2))))
                 .getOrElse(UnaryOperator::identity);
     }
@@ -129,9 +128,8 @@ public class PlainSelectResolver implements Resolver<PlainSelect> {
 
     private UnaryOperator<ResolvingContext> joinOp(PlainSelect select) {
         return Option(select.getJoins())
-                .map(Stream::ofAll)
-                .map(joins -> joins.map(Resolvers::resolve)
-                                   .toList())
+                .map(List::ofAll)
+                .map(joins -> joins.map(Resolvers::resolve))
                 .<UnaryOperator<ResolvingContext>>map(ops -> context -> {
                     AtomicReference<ResolvingContext> ref = new AtomicReference<>(context);
                     return context.withResult(Stream.ofAll(ops)

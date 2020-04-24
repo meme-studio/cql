@@ -20,6 +20,7 @@ public class GroupByElementResolver implements Resolver<GroupByElement> {
                       .map(Resolvers::resolve)
                       .toList();
 
+
         return null;
     }
 }

@@ -44,6 +44,7 @@ public class Resolvers {
                     .put(CaseExpression.class, new CaseExpressionResolver())
                     .put(WhenClause.class, new WhenClauseResolver())
                     .put(StringValue.class, new StringValueResolver())
+                    .put(SubSelect.class, new SubSelectResolver())
                     .put(Function.class, new FunctionResolver());
 
     @SuppressWarnings({"unchecked", "rawtypes"})

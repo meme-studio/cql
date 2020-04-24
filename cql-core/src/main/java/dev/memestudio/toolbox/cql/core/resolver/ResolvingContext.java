@@ -1,17 +1,19 @@
 package dev.memestudio.toolbox.cql.core.resolver;
 
+import io.vavr.collection.List;
+import io.vavr.collection.Map;
 import io.vavr.collection.Stream;
 import lombok.*;
 
-import java.util.Collection;
 import java.util.Comparator;
-import java.util.List;
-import java.util.Map;
 import java.util.function.Function;
 import java.util.function.IntSupplier;
 import java.util.function.Predicate;
 import java.util.function.UnaryOperator;
 
+/**
+ * @author meme
+ */
 @With
 @Getter
 @RequiredArgsConstructor(staticName = "tables")
@@ -19,7 +21,7 @@ import java.util.function.UnaryOperator;
 public class ResolvingContext {
 
     @NonNull
-    private final Map<String, Collection<Map<String, Object>>> tables;
+    private final Map<String, List<Map<String, Object>>> tables;
 
     private List<String> tableNames;
 

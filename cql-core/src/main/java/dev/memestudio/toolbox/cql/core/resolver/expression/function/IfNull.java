@@ -1,11 +1,11 @@
 package dev.memestudio.toolbox.cql.core.resolver.expression.function;
 
+import io.vavr.collection.List;
+import io.vavr.collection.Map;
 import io.vavr.collection.Stream;
 import io.vavr.control.Option;
 import lombok.Getter;
 
-import java.util.List;
-import java.util.Map;
 import java.util.function.Function;
 
 public class IfNull implements Fn {

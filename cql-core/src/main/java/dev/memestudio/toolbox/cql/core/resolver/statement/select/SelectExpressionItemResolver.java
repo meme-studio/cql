@@ -1,14 +1,15 @@
 package dev.memestudio.toolbox.cql.core.resolver.statement.select;
 
+import dev.memestudio.toolbox.cql.core.resolver.Resolver;
 import dev.memestudio.toolbox.cql.core.resolver.Resolvers;
 import dev.memestudio.toolbox.cql.core.resolver.ResolvingContext;
-import dev.memestudio.toolbox.cql.core.resolver.Resolver;
+import io.vavr.collection.Map;
 import net.sf.jsqlparser.statement.select.SelectExpressionItem;
 
-import java.util.Collections;
-import java.util.Map;
 import java.util.Objects;
 import java.util.function.UnaryOperator;
+
+import static io.vavr.API.Map;
 
 public class SelectExpressionItemResolver implements Resolver<SelectExpressionItem> {
 
@@ -23,6 +24,6 @@ public class SelectExpressionItemResolver implements Resolver<SelectExpressionIt
                                       .getResolver()
                                       .apply(row);
         String certainName = Objects.nonNull(selectExpressionItem.getAlias()) ? selectExpressionItem.getAlias().getName() : selectExpressionItem.toString();
-        return Collections.singletonMap(certainName, computed);
+        return Map(certainName, computed);
     }
 }

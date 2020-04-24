@@ -1,9 +1,9 @@
 package dev.memestudio.toolbox.cql.core.resolver.expression.function;
 
+import io.vavr.collection.List;
+import io.vavr.collection.Map;
 import io.vavr.collection.Stream;
 
-import java.util.List;
-import java.util.Map;
 import java.util.function.Function;
 
 /**

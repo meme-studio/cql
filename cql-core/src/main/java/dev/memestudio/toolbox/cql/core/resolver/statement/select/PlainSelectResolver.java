@@ -3,15 +3,14 @@ package dev.memestudio.toolbox.cql.core.resolver.statement.select;
 import dev.memestudio.toolbox.cql.core.resolver.Resolver;
 import dev.memestudio.toolbox.cql.core.resolver.Resolvers;
 import dev.memestudio.toolbox.cql.core.resolver.ResolvingContext;
+import io.vavr.Tuple2;
 import io.vavr.collection.Stream;
 import io.vavr.control.Option;
 import net.sf.jsqlparser.statement.select.PlainSelect;
 
-import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.UnaryOperator;
-import java.util.stream.Collectors;
 
 import static io.vavr.API.Option;
 
@@ -74,10 +73,9 @@ public class PlainSelectResolver implements Resolver<PlainSelect> {
                                                                   .map(row -> Stream.ofAll(ops)
                                                                                     .map(op -> op.apply(context))
                                                                                     .map(ResolvingContext::getMapper)
-                                                                                    .map(mapper -> mapper.apply(row))
-                                                                                    .flatMap(Map::entrySet)
-                                                                                    .filter(entry -> Objects.nonNull(entry.getValue()))
-                                                                                    .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue)))))
+                                                                                    .flatMap(mapper -> mapper.apply(row))
+                                                                                    .filter(tuple2 -> Objects.nonNull(tuple2._2()))
+                                                                                    .toMap(Tuple2::_1, Tuple2::_2))))
                 .getOrElse(UnaryOperator::identity);
     }
 

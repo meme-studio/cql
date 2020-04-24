@@ -1,13 +1,13 @@
 package dev.memestudio.toolbox.cql.core;
 
 import dev.memestudio.toolbox.cql.core.util.ObjectTransformer;
+import io.vavr.collection.List;
+import io.vavr.collection.Map;
 import io.vavr.collection.Stream;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.experimental.FieldDefaults;
 
-import java.util.List;
-import java.util.Map;
 
 @AllArgsConstructor(staticName = "of", access = AccessLevel.PACKAGE)
 @FieldDefaults(makeFinal = true)
@@ -16,7 +16,7 @@ public class ResultSet {
     Stream<Map<String, Object>> result;
 
     public List<Map<String, Object>> asList() {
-        return asStream().toJavaList();
+        return asStream().toList();
     }
 
     public Stream<Map<String, Object>> asStream() {
@@ -24,7 +24,7 @@ public class ResultSet {
     }
 
     public <T> List<T> asList(Class<T> type) {
-        return asStream(type).toJavaList();
+        return asStream(type).toList();
     }
 
     public <T> Stream<T> asStream(Class<T> type) {

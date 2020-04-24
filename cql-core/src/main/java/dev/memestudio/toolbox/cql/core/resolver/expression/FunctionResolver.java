@@ -7,6 +7,7 @@ import dev.memestudio.toolbox.cql.core.resolver.expression.function.Fn;
 import dev.memestudio.toolbox.cql.core.resolver.expression.function.Fns;
 import io.vavr.collection.Stream;
 import io.vavr.control.Option;
+import net.sf.jsqlparser.expression.Function;
 import net.sf.jsqlparser.expression.operators.relational.ExpressionList;
 
 import java.util.List;
@@ -16,9 +17,9 @@ import java.util.function.UnaryOperator;
 /**
  * @author meme
  */
-public class FunctionResolver implements Resolver<net.sf.jsqlparser.expression.Function> {
+public class FunctionResolver implements Resolver<Function> {
     @Override
-    public UnaryOperator<ResolvingContext> resolve(net.sf.jsqlparser.expression.Function function) {
+    public UnaryOperator<ResolvingContext> resolve(Function function) {
         List<UnaryOperator<ResolvingContext>> parameterOps = Option.of(function.getParameters())
                                                                    .map(ExpressionList::getExpressions)
                                                                    .map(Stream::ofAll)

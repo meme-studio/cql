@@ -50,7 +50,6 @@ public class Resolvers {
     public <T> UnaryOperator<ResolvingContext> resolve(@NonNull T type) {
         return RESOLVERS.get(type.getClass())
                         .map(resolver -> ((Resolver) resolver).resolve(type))
-                        .getOrElseThrow(() ->
-                                new UnsupportedOperationException(String.join("", "Syntax '", type.toString(), "' not supported")));
+                        .getOrElseThrow(() -> new ResolvingException("Syntax '", type.toString(), "' not supported"));
     }
 }

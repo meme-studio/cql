@@ -17,7 +17,7 @@ public class ChaosTests {
     @SneakyThrows
     @Test
     public void testCCJSqlParserUtil() {
-        Statement parsed = CCJSqlParserUtil.parse("SELECT count(*), sum(DISTINCT b), ifnull(a, 11), * FROM a LEFT JOIN b ON ii = cc");
+        Statement parsed = CCJSqlParserUtil.parse("SELECT count(*), sum(DISTINCT b), ifnull(a, 11), * FROM a LEFT JOIN b ON ii = cc GROUP BY abs(a % 10) HAVING sum(b)");
         System.out.println(parsed);
     }
 

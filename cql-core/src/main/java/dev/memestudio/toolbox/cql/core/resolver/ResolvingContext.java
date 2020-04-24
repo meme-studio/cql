@@ -37,6 +37,4 @@ public class ResolvingContext {
 
     private IntSupplier limit;
 
-    private boolean singleResultSet = true;
-
 }

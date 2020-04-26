@@ -1,5 +1,6 @@
 package dev.memestudio.toolbox.cql.core.resolver;
 
+import dev.memestudio.toolbox.cql.core.CqlException;
 import dev.memestudio.toolbox.cql.core.resolver.expression.*;
 import dev.memestudio.toolbox.cql.core.resolver.schema.ColumnResolver;
 import dev.memestudio.toolbox.cql.core.resolver.schema.TableResolver;
@@ -12,6 +13,8 @@ import net.sf.jsqlparser.expression.*;
 import net.sf.jsqlparser.expression.operators.conditional.AndExpression;
 import net.sf.jsqlparser.expression.operators.conditional.OrExpression;
 import net.sf.jsqlparser.expression.operators.relational.EqualsTo;
+import net.sf.jsqlparser.expression.operators.relational.GreaterThan;
+import net.sf.jsqlparser.expression.operators.relational.MinorThanEquals;
 import net.sf.jsqlparser.expression.operators.relational.NotEqualsTo;
 import net.sf.jsqlparser.schema.Column;
 import net.sf.jsqlparser.schema.Table;
@@ -45,12 +48,16 @@ public class Resolvers {
                     .put(WhenClause.class, new WhenClauseResolver())
                     .put(StringValue.class, new StringValueResolver())
                     .put(SubSelect.class, new SubSelectResolver())
+                    .put(OrderByElement.class, new OrderByElementResolver())
+                    .put(NullValue.class, new NullValueResolver())
+                    .put(MinorThanEquals.class, new MinorThanEqualsResolver())
+                    .put(GreaterThan.class, new GreaterThanResolver())
                     .put(Function.class, new FunctionResolver());
 
     @SuppressWarnings({"unchecked", "rawtypes"})
     public <T> UnaryOperator<ResolvingContext> resolve(@NonNull T type) {
         return RESOLVERS.get(type.getClass())
                         .map(resolver -> ((Resolver) resolver).resolve(type))
-                        .getOrElseThrow(() -> new ResolvingException("Syntax '", type.toString(), "' not supported"));
+                        .getOrElseThrow(() -> new CqlException("Syntax '", type.toString(), "' not supported"));
     }
 }

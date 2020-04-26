@@ -1,6 +1,6 @@
 package dev.memestudio.toolbox.cql.core.resolver.statement.select;
 
-import dev.memestudio.toolbox.cql.core.resolver.ResolvingException;
+import dev.memestudio.toolbox.cql.core.CqlException;
 import io.vavr.Function3;
 import io.vavr.Tuple2;
 import io.vavr.collection.Map;
@@ -61,7 +61,7 @@ public class JoinType {
                                                                                                                                             .filter(condition)
                                                                                                                                             .orElse(() -> Stream.of(rightRow)))),
                 Case($(), () -> Try.<Function3<Stream<Map<String, Object>>, Stream<Map<String, Object>>, Predicate<Map<String, Object>>, Stream<Map<String, Object>>>>of(() -> {
-                    throw new ResolvingException("Join type '", joinExp, "' not supported");
+                    throw new CqlException("Join type '", joinExp, "' not supported");
                 }).get())
         );
     }

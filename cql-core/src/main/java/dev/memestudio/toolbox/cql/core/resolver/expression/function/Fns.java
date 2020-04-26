@@ -1,6 +1,6 @@
 package dev.memestudio.toolbox.cql.core.resolver.expression.function;
 
-import dev.memestudio.toolbox.cql.core.resolver.ResolvingException;
+import dev.memestudio.toolbox.cql.core.CqlException;
 import io.vavr.collection.List;
 import io.vavr.collection.Map;
 import io.vavr.collection.Stream;
@@ -31,7 +31,7 @@ public class Fns {
 
     public Fn get(String name) {
         return FNS.get(name)
-                  .getOrElseThrow(() -> new ResolvingException("Function '", name, "' not supported"));
+                  .getOrElseThrow(() -> new CqlException("Function '", name, "' not supported"));
     }
 
 }

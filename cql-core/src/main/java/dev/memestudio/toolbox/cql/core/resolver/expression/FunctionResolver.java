@@ -22,10 +22,9 @@ public class FunctionResolver implements Resolver<Function> {
     public UnaryOperator<ResolvingContext> resolve(Function function) {
         List<UnaryOperator<ResolvingContext>> parameterOps = Option.of(function.getParameters())
                                                                    .map(ExpressionList::getExpressions)
-                                                                   .map(Stream::ofAll)
-                                                                   .getOrElse(Stream.empty())
-                                                                   .map(Resolvers::resolve)
-                                                                   .toList();
+                                                                   .map(List::ofAll)
+                                                                   .getOrElse(List.empty())
+                                                                   .map(Resolvers::resolve);
         Fn fn = Fns.get(function.getName());
         return context -> {
             Stream<Map<String, Object>> result = context.getResult();

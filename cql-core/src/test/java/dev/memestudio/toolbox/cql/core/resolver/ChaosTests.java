@@ -15,7 +15,7 @@ public class ChaosTests {
     @Test
     public void testCCJSqlParserUtil() {
         //Statement parsed = CCJSqlParserUtil.parse("SELECT count(*), sum(DISTINCT b), ifnull(a, 11), * FROM a LEFT JOIN b ON ii = cc GROUP BY abs(a % 10) HAVING sum(b)");
-        Statement parsed = CCJSqlParserUtil.parse("SELECT * FROM (SELECT aa FROM a UNION ALL SELECT aa FROM b) JOIN c WHERE id = 1 INTERSECT SELECT cc FROM c");
+        Statement parsed = CCJSqlParserUtil.parse("SELECT CASE a WHEN 1 THEN 'fa' ELSE 'da' END FROM a WHERE (a, c) > '2019-01-01'");
         System.out.println(parsed);
     }
 

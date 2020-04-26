@@ -9,6 +9,7 @@ import io.vavr.collection.Stream;
 import io.vavr.control.Option;
 import net.sf.jsqlparser.statement.select.PlainSelect;
 
+import java.util.Comparator;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.UnaryOperator;
 
@@ -102,11 +103,15 @@ public class PlainSelectResolver implements Resolver<PlainSelect> {
 
     private UnaryOperator<ResolvingContext> orderByOp(PlainSelect select) {
         return Option.of(select.getOrderByElements())
-                     .map(Resolvers::resolve)
-                .<UnaryOperator<ResolvingContext>>map(op ->
-                        ctx -> ctx.withResult(ctx.getResult()
-                                                 .sorted(op.apply(ctx)
-                                                           .getSort())))
+                     .map(List::ofAll)
+                     .map(orderBys -> orderBys.map(Resolvers::resolve))
+                .<UnaryOperator<ResolvingContext>>map(
+                        ops ->
+                                context ->
+                                        context.withResult(context.getResult()
+                                                                  .sorted(ops.map(op -> op.apply(context))
+                                                                             .map(ResolvingContext::getSort)
+                                                                             .reduceLeft(Comparator::thenComparing))))
                 .getOrElse(UnaryOperator::identity);
     }
 
@@ -115,8 +120,9 @@ public class PlainSelectResolver implements Resolver<PlainSelect> {
                      .map(Resolvers::resolve)
                 .<UnaryOperator<ResolvingContext>>map(op ->
                         ctx -> ctx.withResult(ctx.getResult()
-                                                 .filter(op.apply(ctx)
-                                                           .getCondition())))
+                                                 .filter(Option(op.apply(ctx)
+                                                                  .getCondition())
+                                                         .getOrElse(() -> __ -> true))))
                 .getOrElse(UnaryOperator::identity);
     }
 

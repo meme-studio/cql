@@ -5,11 +5,13 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>dev.memestudio.toolbox</groupId>
-    <artifactId>cql</artifactId>
+    <artifactId>cql-parent</artifactId>
     <packaging>pom</packaging>
     <version>0.0.1-SNAPSHOT</version>
     <modules>
         <module>cql-core</module>
+        <module>cql-formatter-cvs</module>
+        <module>cql</module>
     </modules>
 
     <properties>
@@ -22,7 +24,8 @@
         <vavr.version>0.10.2</vavr.version>
         <jsqlparser.version>3.1</jsqlparser.version>
         <lombok.version>1.18.12</lombok.version>
-        <junit-jupiter.version>5.5.2</junit-jupiter.version>
+        <junit.version>5.5.2</junit.version>
+        <logback.version>1.2.3</logback.version>
     </properties>
 
     <dependencies>
@@ -35,6 +38,16 @@
 
     <dependencyManagement>
         <dependencies>
+            <dependency>
+                <groupId>${project.groupId}</groupId>
+                <artifactId>cql-core</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>${project.groupId}</groupId>
+                <artifactId>cql-formatter-cvs</artifactId>
+                <version>${project.version}</version>
+            </dependency>
             <dependency>
                 <groupId>com.github.jsqlparser</groupId>
                 <artifactId>jsqlparser</artifactId>
@@ -51,9 +64,14 @@
                 <version>${lombok.version}</version>
             </dependency>
             <dependency>
+                <groupId>ch.qos.logback</groupId>
+                <artifactId>logback-classic</artifactId>
+                <version>${logback.version}</version>
+            </dependency>
+            <dependency>
                 <groupId>org.junit</groupId>
                 <artifactId>junit-bom</artifactId>
-                <version>${junit-jupiter.version}</version>
+                <version>${junit.version}</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>

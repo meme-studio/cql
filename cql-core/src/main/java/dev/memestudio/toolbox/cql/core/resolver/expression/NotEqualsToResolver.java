@@ -1,7 +1,5 @@
 package dev.memestudio.toolbox.cql.core.resolver.expression;
 
-import dev.memestudio.toolbox.cql.core.resolver.Resolver;
-import dev.memestudio.toolbox.cql.core.resolver.Resolvers;
 import dev.memestudio.toolbox.cql.core.resolver.ResolvingContext;
 import io.vavr.control.Option;
 import net.sf.jsqlparser.expression.operators.relational.NotEqualsTo;
@@ -12,21 +10,18 @@ import java.util.function.UnaryOperator;
 /**
  * @author meme
  */
-public class NotEqualsToResolver implements Resolver<NotEqualsTo> {
+public class NotEqualsToResolver extends BinaryExpressionResolver<NotEqualsTo> {
 
     @Override
-    public UnaryOperator<ResolvingContext> resolve(NotEqualsTo notEqualsTo) {
-        UnaryOperator<ResolvingContext> leftOp = Resolvers.resolve(notEqualsTo.getLeftExpression());
-        UnaryOperator<ResolvingContext> rightOp = Resolvers.resolve(notEqualsTo.getRightExpression());
+    protected UnaryOperator<ResolvingContext> resolve(UnaryOperator<ResolvingContext> leftOp, UnaryOperator<ResolvingContext> rightOp) {
         return context -> context.withCondition(Option.of(context.getCondition())
                                                       .getOrElse(() -> __ -> true)
-                                                      .and(colObj -> !Objects.equals(
+                                                      .and(row -> !Objects.equals(
                                                               leftOp.apply(context)
                                                                     .getResolver()
-                                                                    .apply(colObj),
+                                                                    .apply(row),
                                                               rightOp.apply(context)
                                                                      .getResolver()
-                                                                     .apply(colObj))));
-
+                                                                     .apply(row))));
     }
 }

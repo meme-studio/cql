@@ -1,5 +1,6 @@
-package dev.memestudio.toolbox.cql.core;
+package dev.memestudio.toolbox.cql.core.schema;
 
+import dev.memestudio.toolbox.cql.core.Formatter;
 import dev.memestudio.toolbox.cql.core.util.ObjectTransformer;
 import io.vavr.collection.List;
 import io.vavr.collection.Map;
@@ -8,7 +9,9 @@ import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.experimental.FieldDefaults;
 
-
+/**
+ * @author meme
+ */
 @AllArgsConstructor(staticName = "of", access = AccessLevel.PACKAGE)
 @FieldDefaults(makeFinal = true)
 public class ResultSet {
@@ -31,8 +34,8 @@ public class ResultSet {
         return result.map(row -> ObjectTransformer.convert(row, type));
     }
 
-    public void prettyPrint() {
-        //TODO prettyPrint
+    public Formatter format(Formatter formatter) {
+        return formatter.from(this);
     }
 
 }

@@ -1,5 +1,6 @@
 package dev.memestudio.toolbox.cql.core.resolver;
 
+import dev.memestudio.toolbox.cql.core.schema.Datasource;
 import io.vavr.collection.List;
 import io.vavr.collection.Map;
 import io.vavr.collection.Stream;
@@ -21,9 +22,11 @@ import java.util.function.UnaryOperator;
 public class ResolvingContext {
 
     @NonNull
-    private final Map<String, List<Map<String, Object>>> tables;
+    private final Datasource datasource;
 
     private List<String> tableNames;
+
+    private String columnName;
 
     private Stream<Map<String, Object>> result;
 

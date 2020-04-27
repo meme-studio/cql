@@ -5,7 +5,6 @@ import io.vavr.Function3;
 import io.vavr.Tuple2;
 import io.vavr.collection.Map;
 import io.vavr.collection.Stream;
-import io.vavr.control.Try;
 import lombok.experimental.UtilityClass;
 import net.sf.jsqlparser.statement.select.Join;
 
@@ -60,9 +59,9 @@ public class JoinType {
                 Case($(isIn(JOIN_TYPE_RIGHT, JOIN_TYPE_RIGHT | JOIN_TYPE_OUTER)), (left, right, condition) -> right.flatMap(rightRow -> left.map(rightRow::merge)
                                                                                                                                             .filter(condition)
                                                                                                                                             .orElse(() -> Stream.of(rightRow)))),
-                Case($(), () -> Try.<Function3<Stream<Map<String, Object>>, Stream<Map<String, Object>>, Predicate<Map<String, Object>>, Stream<Map<String, Object>>>>of(() -> {
+                Case($(), () -> {
                     throw new CqlException("Join type '", joinExp, "' not supported");
-                }).get())
+                })
         );
     }
 

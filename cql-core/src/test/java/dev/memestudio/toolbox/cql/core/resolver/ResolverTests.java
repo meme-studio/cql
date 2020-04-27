@@ -39,17 +39,15 @@ public class ResolverTests {
     public void testSubSelect() {
         //"SELECT count(aa), aa.heihei, aa.heihei, CASE WHEN a=1 THEN 9 ELSE 1 END FROM a1 aa JOIN bb ON a1.aa = bb.df JOIN (SELECT * FROM dd) cc ON bb.s = cc.fda WHERE a1.bb = 9 AND (a1.cc = 10 AND a1.cc <> 1)"
         List<Map<String, Object>> result =
-                CollectionQL.statement("SELECT * FROM (SELECT a1.bb FROM a1) WHERE bb = 3")
+                CollectionQL.statement("SELECT * FROM (SELECT a1.`aa.bb` FROM a1) AS `a2` WHERE `a2`.`aa.bb` = 3")
                             .tables(
                                     Datasource.from(
                                             Map("a1", List(
                                                     Map(
-                                                            "bb", 9L,
-                                                            "cc", 10L
+                                                            "aa.bb", 9L
                                                     ),
                                                     Map(
-                                                            "bb", 3L,
-                                                            "cc", 3L
+                                                            "aa.bb", 3L
                                                     )
                                             ))
                                     )
@@ -62,7 +60,7 @@ public class ResolverTests {
     public void testJoinSelect() {
         //"SELECT count(aa), aa.heihei, aa.heihei, CASE WHEN a=1 THEN 9 ELSE 1 END FROM a1 aa JOIN bb ON a1.aa = bb.df JOIN (SELECT * FROM dd) cc ON bb.s = cc.fda WHERE a1.bb = 9 AND (a1.cc = 10 AND a1.cc <> 1)"
         List<Map<String, Object>> result =
-                CollectionQL.statement("SELECT * FROM a1 LEFT JOIN b1 ON a1.bb = b1.bb RIGHT JOIN c1 ON a1.bb = bbb")
+                CollectionQL.statement("SELECT * FROM a1 LEFT JOIN b1 ON a1.bb = b1.bb RIGHT JOIN c1 ON a1.bb = c1.`bbb`")
                             .tables(
                                     Datasource.from(
                                             Map(

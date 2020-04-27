@@ -1,5 +1,6 @@
 package dev.memestudio.toolbox.cql.core.resolver;
 
+import dev.memestudio.toolbox.cql.core.resolver.expression.EqualsToResolver;
 import dev.memestudio.toolbox.cql.core.schema.Datasource;
 import io.vavr.collection.Map;
 import io.vavr.collection.Stream;
@@ -42,6 +43,11 @@ public class ResolvingContext {
     public ResolvingContext withAppendedCondition(UnaryOperator<Predicate<Map<String, Object>>> conditionAppender) {
         return this.withCondition(conditionAppender.apply(Option.of(condition)
                                                                 .getOrElse(() -> __ -> true)));
+    }
+
+    public static void main(String[] args) {
+        Class<EqualsToResolver> equalsToResolverClass = EqualsToResolver.class;
+        System.out.println();
     }
 
 }

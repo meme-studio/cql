@@ -1,64 +1,46 @@
 package dev.memestudio.toolbox.cql.core.resolver;
 
 import dev.memestudio.toolbox.cql.core.CqlException;
-import dev.memestudio.toolbox.cql.core.resolver.expression.*;
-import dev.memestudio.toolbox.cql.core.resolver.schema.ColumnResolver;
-import dev.memestudio.toolbox.cql.core.resolver.schema.TableResolver;
-import dev.memestudio.toolbox.cql.core.resolver.statement.select.*;
-import io.vavr.collection.HashMap;
+import io.vavr.collection.List;
 import io.vavr.collection.Map;
+import io.vavr.control.Try;
 import lombok.NonNull;
 import lombok.experimental.UtilityClass;
-import net.sf.jsqlparser.expression.*;
-import net.sf.jsqlparser.expression.operators.conditional.AndExpression;
-import net.sf.jsqlparser.expression.operators.conditional.OrExpression;
-import net.sf.jsqlparser.expression.operators.relational.EqualsTo;
-import net.sf.jsqlparser.expression.operators.relational.GreaterThan;
-import net.sf.jsqlparser.expression.operators.relational.MinorThanEquals;
-import net.sf.jsqlparser.expression.operators.relational.NotEqualsTo;
-import net.sf.jsqlparser.schema.Column;
-import net.sf.jsqlparser.schema.Table;
-import net.sf.jsqlparser.statement.select.*;
 
+import java.lang.reflect.AnnotatedType;
+import java.lang.reflect.ParameterizedType;
+import java.util.ServiceLoader;
 import java.util.function.UnaryOperator;
+
+import static java.util.function.Function.identity;
 
 /**
  * @author meme
  */
+@SuppressWarnings({"unchecked", "rawtypes"})
 @UtilityClass
 public class Resolvers {
 
-    private final Map<Class<?>, Resolver<?>> RESOLVERS =
-            HashMap.<Class<?>, Resolver<?>>empty()
-                    .put(AndExpression.class, new AndExpressionResolver())
-                    .put(OrExpression.class, new OrExpressionResolver())
-                    .put(NotExpression.class, new NotExpressionResolver())
-                    .put(Parenthesis.class, new ParenthesisResolver())
-                    .put(Column.class, new ColumnResolver())
-                    .put(EqualsTo.class, new EqualsToResolver())
-                    .put(LongValue.class, new LongValueResolver())
-                    .put(PlainSelect.class, new PlainSelectResolver())
-                    .put(Select.class, new SelectResolver())
-                    .put(Table.class, new TableResolver())
-                    .put(NotEqualsTo.class, new NotEqualsToResolver())
-                    .put(SelectExpressionItem.class, new SelectExpressionItemResolver())
-                    .put(AllColumns.class, new AllColumnsResolver())
-                    .put(Join.class, new JoinResolver())
-                    .put(CaseExpression.class, new CaseExpressionResolver())
-                    .put(WhenClause.class, new WhenClauseResolver())
-                    .put(StringValue.class, new StringValueResolver())
-                    .put(SubSelect.class, new SubSelectResolver())
-                    .put(OrderByElement.class, new OrderByElementResolver())
-                    .put(NullValue.class, new NullValueResolver())
-                    .put(MinorThanEquals.class, new MinorThanEqualsResolver())
-                    .put(GreaterThan.class, new GreaterThanResolver())
-                    .put(Offset.class, new OffsetResolver())
-                    .put(Function.class, new FunctionResolver());
+    private final Map<Class<?>, Resolver> RESOLVERS = List.ofAll(ServiceLoader.load(Resolver.class))
+                                                          .toMap(Resolvers::resolveType, identity());
 
-    @SuppressWarnings({"unchecked", "rawtypes"})
+    private Class<?> resolveType(Resolver resolver) {
+        return Try.of(resolver::getClass)
+                  .map(type -> Try.of(type::getAnnotatedInterfaces)
+                                  .map(types -> types[0])
+                                  .getOrElse(type::getAnnotatedSuperclass))
+                  .map(AnnotatedType::getType)
+                  .map(ParameterizedType.class::cast)
+                  .map(ParameterizedType::getActualTypeArguments)
+                  .map(types -> types[0])
+                  .map(Class.class::cast)
+                  .getOrElseThrow(() -> new CqlException("Illegal resolver '", resolver.getClass().getName(), "'"));
+    }
+
     public <T> UnaryOperator<ResolvingContext> resolve(@NonNull T type) {
         return RESOLVERS.get(type.getClass())
-                        .map(resolver -> ((Resolver) resolver).resolve(type))
+                        .map(resolver -> resolver.resolve(type))
                         .getOrElseThrow(() -> new CqlException("Syntax '", type.toString(), "' not supported"));
     }
+
 }

@@ -18,7 +18,6 @@ public class GroupByElementResolver implements Resolver<GroupByElement> {
                 List.ofAll(groupByElement.getGroupByExpressions())
                       .map(Resolvers::resolve);
 
-
         return null;
     }
 }

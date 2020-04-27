@@ -4,7 +4,6 @@ import dev.memestudio.toolbox.cql.core.resolver.Resolver;
 import dev.memestudio.toolbox.cql.core.resolver.Resolvers;
 import dev.memestudio.toolbox.cql.core.resolver.ResolvingContext;
 import io.vavr.Function3;
-import io.vavr.collection.List;
 import io.vavr.collection.Map;
 import io.vavr.collection.Stream;
 import io.vavr.control.Option;
@@ -30,12 +29,9 @@ public class JoinResolver implements Resolver<Join> {
             Stream<Map<String, Object>> left = context.getResult();
             ResolvingContext ctx = rightItemOp.apply(context);
             Stream<Map<String, Object>> right = ctx.getResult();
-            List<String> tableNames = context.getTableNames()
-                                             .appendAll(ctx.getTableNames());
-            Predicate<Map<String, Object>> condition = expressionOp.apply(context.withTableNames(tableNames))
+            Predicate<Map<String, Object>> condition = expressionOp.apply(context)
                                                                    .getCondition();
-            return context.withTableNames(tableNames)
-                          .withResult(resolver.apply(left, right, condition));
+            return context.withResult(resolver.apply(left, right, condition));
         };
     }
 

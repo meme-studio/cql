@@ -52,6 +52,7 @@ public class Resolvers {
                     .put(NullValue.class, new NullValueResolver())
                     .put(MinorThanEquals.class, new MinorThanEqualsResolver())
                     .put(GreaterThan.class, new GreaterThanResolver())
+                    .put(Offset.class, new OffsetResolver())
                     .put(Function.class, new FunctionResolver());
 
     @SuppressWarnings({"unchecked", "rawtypes"})

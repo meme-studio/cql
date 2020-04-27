@@ -32,8 +32,8 @@ public class OrderByElementResolver implements Resolver<OrderByElement> {
                             comparator = asc ? comparator : comparator.reversed();
                             comparator = Objects.equals(nullOrdering, OrderByElement.NullOrdering.NULLS_FIRST)
                                     ? Comparator.nullsFirst(comparator) : Comparator.nullsLast(comparator);
-                            return context.withSort(comparator);
+                            return context.withComparator(comparator);
                         })
-                        .getOrElse(context.withSort((row1, row2) -> 0));
+                        .getOrElse(context.withComparator((row1, row2) -> 0));
     }
 }

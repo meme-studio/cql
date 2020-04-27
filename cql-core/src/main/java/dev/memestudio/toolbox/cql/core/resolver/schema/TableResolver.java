@@ -8,8 +8,6 @@ import net.sf.jsqlparser.schema.Table;
 
 import java.util.function.UnaryOperator;
 
-import static io.vavr.API.List;
-
 public class TableResolver implements Resolver<Table> {
 
     @Override
@@ -17,8 +15,7 @@ public class TableResolver implements Resolver<Table> {
         String certainName = Option.of(table.getAlias())
                                    .map(Alias::getName)
                                    .getOrElse(table::getName);
-        return context -> context.withTableNames(List(certainName))
-                                 .withResult(context.getDatasource()
+        return context -> context.withResult(context.getDatasource()
                                                     .getTable(table.getName())
                                                     .map(row -> row.mapKeys(colName -> String.format("%s.%s", certainName, colName)))
                                                     .toStream());

@@ -1,19 +1,24 @@
 package dev.memestudio.toolbox.cql.core.resolver.statement.select;
 
+import dev.memestudio.toolbox.cql.core.CqlException;
 import dev.memestudio.toolbox.cql.core.resolver.Resolver;
 import dev.memestudio.toolbox.cql.core.resolver.Resolvers;
 import dev.memestudio.toolbox.cql.core.resolver.ResolvingContext;
+import dev.memestudio.toolbox.cql.core.util.Validates;
 import io.vavr.Tuple2;
 import io.vavr.collection.List;
 import io.vavr.collection.Stream;
 import io.vavr.control.Option;
+import net.sf.jsqlparser.statement.select.Limit;
 import net.sf.jsqlparser.statement.select.PlainSelect;
 
 import java.util.Comparator;
+import java.util.Objects;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.UnaryOperator;
 
 import static io.vavr.API.Option;
+import static io.vavr.Predicates.noneOf;
 
 public class PlainSelectResolver implements Resolver<PlainSelect> {
 
@@ -70,36 +75,44 @@ public class PlainSelectResolver implements Resolver<PlainSelect> {
                 .<UnaryOperator<ResolvingContext>>map(
                         ops ->
                                 context ->
-                                        context.withResult(context.getResult()
-                                                                  .map(row -> Stream.ofAll(ops)
-                                                                                    .map(op -> op.apply(context))
-                                                                                    .map(ResolvingContext::getMapper)
-                                                                                    .flatMap(mapper -> mapper.apply(row))
-                                                                                    .toMap(Tuple2::_1, Tuple2::_2))))
+                                        context.withTransformResult(result ->
+                                                result.map(row -> Stream.ofAll(ops)
+                                                                        .map(op -> op.apply(context))
+                                                                        .map(ResolvingContext::getMapper)
+                                                                        .flatMap(mapper -> mapper.apply(row))
+                                                                        .toMap(Tuple2::_1, Tuple2::_2))))
                 .getOrElse(UnaryOperator::identity);
     }
 
     private UnaryOperator<ResolvingContext> limitOp(PlainSelect select) {
         return Option.of(select.getLimit())
+                     .filter(noneOf(Limit::isLimitAll, Limit::isLimitNull))
+                     .map(Limit::getRowCount)
                      .map(Resolvers::resolve)
                 .<UnaryOperator<ResolvingContext>>map(op ->
-                        ctx -> ctx.withResult(ctx.getResult()
-                                                 .take(op.apply(ctx)
-                                                         .getLimit()
-                                                         .getAsInt())))
+                        context -> context.withTransformResult(result -> result.take(((Number) op.apply(context)
+                                                                                                 .getResolver()
+                                                                                                 .apply(null)).intValue())))
                 .getOrElse(UnaryOperator::identity);
     }
 
     private UnaryOperator<ResolvingContext> offsetOp(PlainSelect select) {
-        return Option.of(select.getOffset())
-                     .map(Resolvers::resolve)
+        Validates.isTrue(
+                !(Objects.nonNull(select.getOffset()) &&
+                        Objects.nonNull(Option(select.getLimit()).map(Limit::getOffset)
+                                                                 .getOrNull())),
+                () -> new CqlException("Duplicate defined offset"));
+
+        return Option(select.getOffset()).map(Resolvers::resolve)
+                                         .orElse(() -> Option(select.getLimit()).map(Limit::getOffset)
+                                                                                .map(Resolvers::resolve))
                 .<UnaryOperator<ResolvingContext>>map(op ->
-                        ctx -> ctx.withResult(ctx.getResult()
-                                                 .take(op.apply(ctx)
-                                                         .getOffset()
-                                                         .getAsInt())))
+                        context -> context.withTransformResult(result -> result.drop(((Number) op.apply(context)
+                                                                                                 .getResolver()
+                                                                                                 .apply(null)).intValue())))
                 .getOrElse(UnaryOperator::identity);
     }
+
 
     private UnaryOperator<ResolvingContext> orderByOp(PlainSelect select) {
         return Option.of(select.getOrderByElements())
@@ -108,10 +121,10 @@ public class PlainSelectResolver implements Resolver<PlainSelect> {
                 .<UnaryOperator<ResolvingContext>>map(
                         ops ->
                                 context ->
-                                        context.withResult(context.getResult()
-                                                                  .sorted(ops.map(op -> op.apply(context))
-                                                                             .map(ResolvingContext::getSort)
-                                                                             .reduceLeft(Comparator::thenComparing))))
+                                        context.withTransformResult(
+                                                result -> result.sorted(ops.map(op -> op.apply(context))
+                                                                           .map(ResolvingContext::getComparator)
+                                                                           .reduceLeft(Comparator::thenComparing))))
                 .getOrElse(UnaryOperator::identity);
     }
 
@@ -119,10 +132,10 @@ public class PlainSelectResolver implements Resolver<PlainSelect> {
         return Option.of(select.getWhere())
                      .map(Resolvers::resolve)
                 .<UnaryOperator<ResolvingContext>>map(op ->
-                        ctx -> ctx.withResult(ctx.getResult()
-                                                 .filter(Option(op.apply(ctx)
-                                                                  .getCondition())
-                                                         .getOrElse(() -> __ -> true))))
+                        ctx -> ctx.withTransformResult(
+                                result -> result.filter(Option(op.apply(ctx)
+                                                                 .getCondition())
+                                        .getOrElse(() -> __ -> true))))
                 .getOrElse(UnaryOperator::identity);
     }
 
